@@ -120,7 +120,7 @@ void VS_CC quadraticBezierCurveCreate(const VSMap* in, VSMap* out, void* userDat
 	int scale = ((1 << bitsPerSample) - 1) / 255;
 
 	// Set default values
-	d->range = int64ToIntS(vsapi->propGetInt(in, "range", 0, &err));
+	d->range = int64ToIntS(vsapi->propGetInt(in, "input_range", 0, &err));
 	if (err)
 		d->range = 0;  // Default range is PC range
 
@@ -273,7 +273,7 @@ void VS_CC cubicBezierCurveCreate(const VSMap* in, VSMap* out, void* userData, V
 	int scale = ((1 << bitsPerSample) - 1) / 255;
 
 	// Set default values
-	d->range = int64ToIntS(vsapi->propGetInt(in, "range", 0, &err));
+	d->range = int64ToIntS(vsapi->propGetInt(in, "input_range", 0, &err));
 	if (err)
 		d->range = 0;  // Default range is PC range
 
@@ -394,7 +394,7 @@ VS_EXTERNAL_API(void) VapourSynthPluginInit(VSConfigPlugin configFunc, VSRegiste
 		"Cubic",
 		"clip:clip;"
 		"accur:float:opt;"
-		"range:int:opt;"
+		"input_range:int:opt;"
 		"begin:int:opt;"
 		"end:int:opt;"
 		"x1:int:opt;"
@@ -407,7 +407,7 @@ VS_EXTERNAL_API(void) VapourSynthPluginInit(VSConfigPlugin configFunc, VSRegiste
 		"Quadratic",
 		"clip:clip;"
 		"accur:float:opt;"
-		"range:int:opt;"
+		"input_range:int:opt;"
 		"begin:int:opt;"
 		"end:int:opt;"
 		"x1:int:opt;"
