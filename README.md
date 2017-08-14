@@ -5,7 +5,7 @@ A plugin which adjust the clip via bezier curve.
 BezierCurve is a plugin which allow you to adjust
 a clip by specifying a quadratic or a cubic bezier curve. <br />
 The curve is specified by giving the values of begin point, end point and coordinates of anchor points. <br />
-It's suited for ajusting the mask clips such as sharp-weight or nr-weight in a easy and customized way without going
+It's suited for adjusting the mask clips such as sharp-weight or nr-weight in a easy and customized way without going
 deep into mathematics.
 
 ## Supported Formats
