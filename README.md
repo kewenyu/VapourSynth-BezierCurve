@@ -13,15 +13,14 @@ deep into mathematics.
 
 ## Usage
 ```python
-core.bezier.Quadratic(clip, accur, range, begin, end, x1, y1)
-core.bezier.Cubic(clip, accur, range, begin, end, x1, y1, x2, y2)
+core.bezier.Quadratic(clip, accur, input_range, begin, end, x1, y1)
+core.bezier.Cubic(clip, accur, input_range, begin, end, x1, y1, x2, y2)
 ```
 
 ## Parameters
 - clip:  a 8bit or 16bit integer YUV clip.
-- accur:  accuracy of the bezier curve. Smaller values result in a more accurate curve. <br />
-Note that the accur only affect initializing speed and affect little on processing speed.
-- range:  specify the range of input clip.  0 - PC range,  1 - TV range.
+- accur:  accuracy of the bezier curve. Smaller values result in a more accurate curve. Note that the accur only affect initializing speed and affect little on processing speed.
+- input_range:  specify the range of input clip.  0 - PC range,  1 - TV range. If input clip is TV range, it will be expand to PC range.
 - begin:  begin values of the curve.
 - end:  end values of the curve.
 - x1, y1, x2, y2:  the coordinates of anchors.
