@@ -130,11 +130,11 @@ void VS_CC quadraticBezierCurveCreate(const VSMap* in, VSMap* out, void* userDat
 
 	d->begin = int64ToIntS(vsapi->propGetInt(in, "begin", 0, &err));
 	if (err)
-		d->begin = 128 * scale;
+		d->begin = 0;
 
 	d->end = int64ToIntS(vsapi->propGetInt(in, "end", 0, &err));
 	if (err)
-		d->end = 128 * scale;
+		d->end = 255 * scale;
 
 	d->x1 = int64ToIntS(vsapi->propGetInt(in, "x1", 0, &err));
 	if (err)
@@ -283,27 +283,27 @@ void VS_CC cubicBezierCurveCreate(const VSMap* in, VSMap* out, void* userData, V
 
 	d->begin = int64ToIntS(vsapi->propGetInt(in, "begin", 0, &err));
 	if (err)
-		d->begin = 128 * scale;
+		d->begin = 0;
 
 	d->end = int64ToIntS(vsapi->propGetInt(in, "end", 0, &err));
 	if (err)
-		d->end = 128 * scale;
+		d->end = 255 * scale;
 
 	d->x1 = int64ToIntS(vsapi->propGetInt(in, "x1", 0, &err));
 	if (err)
-		d->x1 = 128 * scale;
+		d->x1 = 85 * scale;
 
 	d->x2 = int64ToIntS(vsapi->propGetInt(in, "x2", 0, &err));
 	if (err)
-		d->x2 = 128 * scale;
+		d->x2 = 170 * scale;
 
 	d->y1 = int64ToIntS(vsapi->propGetInt(in, "y1", 0, &err));
 	if (err)
-		d->y1 = 128 * scale;
+		d->y1 = 85 * scale;
 
 	d->y2 = int64ToIntS(vsapi->propGetInt(in, "y2", 0, &err));
 	if (err)
-		d->y2 = 128 * scale;
+		d->y2 = 170 * scale;
 
 	// Check parameters
 	try
