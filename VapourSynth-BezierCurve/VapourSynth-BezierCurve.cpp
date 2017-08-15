@@ -4,12 +4,6 @@
 #include "BezierCurve.h"
 
 
-static void VS_CC quadraticBezierCurveInit(VSMap* in, VSMap* out, void** instanceData, VSNode* node, VSCore* core, const VSAPI* vsapi)
-{
-	quadraticBezierCurveData* d = static_cast<quadraticBezierCurveData *>(*instanceData);
-	vsapi->setVideoInfo(d->vi, 1, node);
-}
-
 template<typename T>
 static void process(const VSFrameRef* src, VSFrameRef* dst, const VSFormat* fi, const quadraticBezierCurveData* d, const VSAPI* vsapi)
 {
@@ -62,6 +56,12 @@ static void process(const VSFrameRef* src, VSFrameRef* dst, const VSFormat* fi, 
 			srcp += src_stride;
 		}
 	}
+}
+
+static void VS_CC quadraticBezierCurveInit(VSMap* in, VSMap* out, void** instanceData, VSNode* node, VSCore* core, const VSAPI* vsapi)
+{
+	quadraticBezierCurveData* d = static_cast<quadraticBezierCurveData *>(*instanceData);
+	vsapi->setVideoInfo(d->vi, 1, node);
 }
 
 static const VSFrameRef* VS_CC quadraticBezierCurveGetFrame(int n, int activationReason, void** instanceData, void** frameData, VSFrameContext* frameCtx, VSCore* core, const VSAPI* vsapi)
