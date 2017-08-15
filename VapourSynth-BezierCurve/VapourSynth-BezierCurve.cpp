@@ -163,15 +163,15 @@ void VS_CC quadraticBezierCurveCreate(const VSMap* in, VSMap* out, void* userDat
 			throw std::string("accur must be between 0 and 1");
 		}
 
-		if (d->begin < 0 || d->begin > 255 * scale)
+		/*if (d->begin < 0 || d->begin > 255 * scale)
 		{
 			throw std::string("begin must be between 0 and " + std::to_string(255 * scale));
-		}
+		}*/
 
-		if (d->end < 0 || d->end > 255 * scale)
+		/*if (d->end < 0 || d->end > 255 * scale)
 		{
 			throw std::string("end must be between 0 and " + std::to_string(255 * scale));
-		}
+		}*/
 
 		if (d->x1 < 0 || d->x1 > 255 * scale)
 		{
@@ -324,15 +324,15 @@ void VS_CC cubicBezierCurveCreate(const VSMap* in, VSMap* out, void* userData, V
 			throw std::string("accur must be between 0 and 1");
 		}
 
-		if (d->begin < 0 || d->begin > 255 * scale)
+		/*if (d->begin < 0 || d->begin > 255 * scale)
 		{
 			throw std::string("begin must be between 0 and " + std::to_string(255 * scale));
-		}
+		}*/
 
-		if (d->end < 0 || d->end > 255 * scale)
+		/*if (d->end < 0 || d->end > 255 * scale)
 		{
 			throw std::string("end must be between 0 and " + std::to_string(255 * scale));
-		}
+		}*/
 
 		if (d->x1 < 0 || d->x1 > 255 * scale)
 		{
@@ -344,10 +344,10 @@ void VS_CC cubicBezierCurveCreate(const VSMap* in, VSMap* out, void* userData, V
 			throw std::string("x2 must be between 0 and " + std::to_string(255 * scale));
 		}
 
-		if (d->x1 >= d->x2)
+		/*if (d->x1 >= d->x2)
 		{
 			throw std::string("x1 must be smaller than x2");
-		}
+		}*/
 	}
 	catch (const std::string& error)
 	{
