@@ -43,5 +43,5 @@ double QuadraticBezierCurve::bezierT(double x)
 		t += m_accur;
 	}
 
-	return 0;
+	return 1;
 }
