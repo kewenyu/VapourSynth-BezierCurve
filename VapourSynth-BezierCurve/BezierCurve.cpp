@@ -21,7 +21,7 @@ double BezierCurve::normalize(int x)
 	{
 		if (x < 16 * scale)
 			result = 0;
-		else if (x > 255 * scale)
+		else if (x > 235 * scale)
 			result = 1;
 		else
 			result = (x - 16 * scale) / (235. * scale - 16. * scale);
