@@ -370,7 +370,7 @@ void VS_CC cubicBezierCurveCreate(const VSMap* in, VSMap* out, void* userData, V
 	}
 
 	CubicBezierCurve curve(d->range, d->accur, bitsPerSample, d->begin, d->end, d->x1, d->y1, d->x2, d->y2);
-	for (int i = 0; i < 255 * scale; i++)
+	for (int i = 0; i <= 255 * scale; i++)
 	{
 		double t = curve.bezierT(curve.normalize(i));
 		double y = floor(curve.bezierY(t));
