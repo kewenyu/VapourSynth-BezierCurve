@@ -9,26 +9,29 @@ static void process(const VSFrameRef* src, VSFrameRef* dst, const VSFormat* fi, 
 {
 	for (int plane = 0; plane < fi->numPlanes; plane++)
 	{
-		const T* srcp = reinterpret_cast<const T *>(vsapi->getReadPtr(src, plane));
-		int src_stride = vsapi->getStride(src, plane) / sizeof(T);
+        if (d->process[plane])
+        {
+            const T* srcp = reinterpret_cast<const T*>(vsapi->getReadPtr(src, plane));
+            int src_stride = vsapi->getStride(src, plane) / sizeof(T);
 
-		T* dstp = reinterpret_cast<T *>(vsapi->getWritePtr(dst, plane));
-		int dst_stride = vsapi->getStride(dst, plane) / sizeof(T);
+            T* dstp = reinterpret_cast<T*>(vsapi->getWritePtr(dst, plane));
+            int dst_stride = vsapi->getStride(dst, plane) / sizeof(T);
 
-		int w = vsapi->getFrameWidth(src, plane);
-		int h = vsapi->getFrameHeight(src, plane);
+            int w = vsapi->getFrameWidth(src, plane);
+            int h = vsapi->getFrameHeight(src, plane);
 
-		for (int y = 0; y < h; y++)
-		{
-			for (int x = 0; x < w; x++)
-			{
-				dstp[x] = d->lutTable[srcp[x]];
-			}
+            for (int y = 0; y < h; y++)
+            {
+                for (int x = 0; x < w; x++)
+                {
+                    dstp[x] = d->lutTable[srcp[x]];
+                }
 
-			dstp += dst_stride;
-			srcp += src_stride;
-		}
-	}
+                dstp += dst_stride;
+                srcp += src_stride;
+            }
+        }
+    }
 }
 
 template <typename T>
@@ -36,26 +39,29 @@ static void process(const VSFrameRef* src, VSFrameRef* dst, const VSFormat* fi, 
 {
 	for (int plane = 0; plane < fi->numPlanes; plane++)
 	{
-		const T* srcp = reinterpret_cast<const T *>(vsapi->getReadPtr(src, plane));
-		int src_stride = vsapi->getStride(src, plane) / sizeof(T);
+        if (d->process[plane])
+        {
+            const T* srcp = reinterpret_cast<const T*>(vsapi->getReadPtr(src, plane));
+            int src_stride = vsapi->getStride(src, plane) / sizeof(T);
 
-		T* dstp = reinterpret_cast<T *>(vsapi->getWritePtr(dst, plane));
-		int dst_stride = vsapi->getStride(dst, plane) / sizeof(T);
+            T* dstp = reinterpret_cast<T*>(vsapi->getWritePtr(dst, plane));
+            int dst_stride = vsapi->getStride(dst, plane) / sizeof(T);
 
-		int w = vsapi->getFrameWidth(src, plane);
-		int h = vsapi->getFrameHeight(src, plane);
+            int w = vsapi->getFrameWidth(src, plane);
+            int h = vsapi->getFrameHeight(src, plane);
 
-		for (int y = 0; y < h; y++)
-		{
-			for (int x = 0; x < w; x++)
-			{
-				dstp[x] = d->lutTable[srcp[x]];
-			}
+            for (int y = 0; y < h; y++)
+            {
+                for (int x = 0; x < w; x++)
+                {
+                    dstp[x] = d->lutTable[srcp[x]];
+                }
 
-			dstp += dst_stride;
-			srcp += src_stride;
-		}
-	}
+                dstp += dst_stride;
+                srcp += src_stride;
+            }
+        }
+    }
 }
 
 static void VS_CC quadraticBezierCurveInit(VSMap* in, VSMap* out, void** instanceData, VSNode* node, VSCore* core, const VSAPI* vsapi)
@@ -81,7 +87,15 @@ static const VSFrameRef* VS_CC quadraticBezierCurveGetFrame(int n, int activatio
 		int height = d->vi->height;
 		int bytesPerSample = d->vi->format->bytesPerSample;
 
-		VSFrameRef* dst = vsapi->newVideoFrame(fi, width, height, src, core);
+		const VSFrameRef* frames[] = {
+			d->process[0] ? nullptr : src,
+			d->process[1] ? nullptr : src,
+			d->process[2] ? nullptr : src,
+		};
+
+		const int processPlane[] = {0, 1, 2};
+
+		VSFrameRef* dst = vsapi->newVideoFrame2(d->vi->format, width, height, frames, processPlane, src, core);
 
 		if (bytesPerSample == 1)
 		{
@@ -96,7 +110,7 @@ static const VSFrameRef* VS_CC quadraticBezierCurveGetFrame(int n, int activatio
 		return dst;
 	}
 
-	return 0;
+	return nullptr;
 }
 
 static void VS_CC quadraticBezierCurveFree(void* instanceData, VSCore* core, const VSAPI* vsapi)
@@ -113,7 +127,7 @@ void VS_CC quadraticBezierCurveCreate(const VSMap* in, VSMap* out, void* userDat
 	d->lutTable = nullptr;
 	int err;
 
-	d->node = vsapi->propGetNode(in, "clip", 0, 0);
+	d->node = vsapi->propGetNode(in, "clip", 0, nullptr);
 	d->vi = vsapi->getVideoInfo(d->node);
 
 	int bitsPerSample = d->vi->format->bitsPerSample;
@@ -144,6 +158,13 @@ void VS_CC quadraticBezierCurveCreate(const VSMap* in, VSMap* out, void* userDat
 	if (err)
 		d->y1 = 128 * scale;
 
+	const int numPlanes = vsapi->propNumElements(in, "planes");
+
+	for (int i = 0; i < 3; i++)
+    {
+	    d->process[i] = (numPlanes <= 0);
+    }
+
 	// Check parameters
 	try
 	{
@@ -163,20 +184,27 @@ void VS_CC quadraticBezierCurveCreate(const VSMap* in, VSMap* out, void* userDat
 			throw std::string("accur must be between 0 and 1");
 		}
 
-		/*if (d->begin < 0 || d->begin > 255 * scale)
-		{
-			throw std::string("begin must be between 0 and " + std::to_string(255 * scale));
-		}*/
-
-		/*if (d->end < 0 || d->end > 255 * scale)
-		{
-			throw std::string("end must be between 0 and " + std::to_string(255 * scale));
-		}*/
-
 		if (d->x1 < 0 || d->x1 > 255 * scale)
 		{
 			throw std::string("x1 must be between 0 and " + std::to_string(255 * scale));
 		}
+
+		for (int i = 0; i < numPlanes; i++)
+        {
+		    const int plane = int64ToIntS(vsapi->propGetInt(in, "planes", i, nullptr));
+
+            if (plane < 0 || plane >= d->vi->format->numPlanes)
+            {
+                throw std::string("plane index invalid");
+            }
+
+		    if (d->process[plane])
+            {
+		        throw std::string("duplicate plane specific");
+            }
+
+		    d->process[plane] = true;
+        }
 	}
 	catch (const std::string& error)
 	{
@@ -234,7 +262,15 @@ static const VSFrameRef* VS_CC cubicBezierCurveGetFrame(int n, int activationRea
 		int height = d->vi->height;
 		int bytesPerSample = d->vi->format->bytesPerSample;
 
-		VSFrameRef* dst = vsapi->newVideoFrame(fi, width, height, src, core);
+		const VSFrameRef* frames[] = {
+				d->process[0] ? nullptr : src,
+				d->process[1] ? nullptr : src,
+				d->process[2] ? nullptr : src,
+		};
+
+		const int processPlane[] = {0, 1, 2};
+
+		VSFrameRef* dst = vsapi->newVideoFrame2(d->vi->format, width, height, frames, processPlane, src, core);
 
 		if (bytesPerSample == 1)
 		{
@@ -249,7 +285,7 @@ static const VSFrameRef* VS_CC cubicBezierCurveGetFrame(int n, int activationRea
 		return dst;
 	}
 
-	return 0;
+	return nullptr;
 }
 
 static void VS_CC cubicBezierCurveFree(void* instanceData, VSCore* core, const VSAPI* vsapi)
@@ -266,7 +302,7 @@ void VS_CC cubicBezierCurveCreate(const VSMap* in, VSMap* out, void* userData, V
 	d->lutTable = nullptr;
 	int err;
 
-	d->node = vsapi->propGetNode(in, "clip", 0, 0);
+	d->node = vsapi->propGetNode(in, "clip", 0, nullptr);
 	d->vi = vsapi->getVideoInfo(d->node);
 
 	int bitsPerSample = d->vi->format->bitsPerSample;
@@ -305,6 +341,13 @@ void VS_CC cubicBezierCurveCreate(const VSMap* in, VSMap* out, void* userData, V
 	if (err)
 		d->y2 = 170 * scale;
 
+	const int numPlanes = vsapi->propNumElements(in, "planes");
+
+	for (int i = 0; i < 3; i++)
+	{
+		d->process[i] = (numPlanes <= 0);
+	}
+
 	// Check parameters
 	try
 	{
@@ -324,16 +367,6 @@ void VS_CC cubicBezierCurveCreate(const VSMap* in, VSMap* out, void* userData, V
 			throw std::string("accur must be between 0 and 1");
 		}
 
-		/*if (d->begin < 0 || d->begin > 255 * scale)
-		{
-			throw std::string("begin must be between 0 and " + std::to_string(255 * scale));
-		}*/
-
-		/*if (d->end < 0 || d->end > 255 * scale)
-		{
-			throw std::string("end must be between 0 and " + std::to_string(255 * scale));
-		}*/
-
 		if (d->x1 < 0 || d->x1 > 255 * scale)
 		{
 			throw std::string("x1 must be between 0 and " + std::to_string(255 * scale));
@@ -348,6 +381,23 @@ void VS_CC cubicBezierCurveCreate(const VSMap* in, VSMap* out, void* userData, V
 		{
 			throw std::string("x1 must be smaller than x2");
 		}*/
+
+		for (int i = 0; i < numPlanes; i++)
+		{
+			const int plane = int64ToIntS(vsapi->propGetInt(in, "planes", i, nullptr));
+
+			if (plane < 0 || plane >= d->vi->format->numPlanes)
+			{
+				throw std::string("plane index invalid");
+			}
+
+			if (d->process[plane])
+			{
+				throw std::string("duplicate plane specific");
+			}
+
+			d->process[plane] = true;
+		}
 	}
 	catch (const std::string& error)
 	{
@@ -356,7 +406,7 @@ void VS_CC cubicBezierCurveCreate(const VSMap* in, VSMap* out, void* userData, V
 		return;
 	}
 
-	// Allocate memory for lut table
+	// Allocate memory for lookup table
 	try
 	{
 		d->lutTable = new int[255 * scale + 1];
@@ -364,7 +414,7 @@ void VS_CC cubicBezierCurveCreate(const VSMap* in, VSMap* out, void* userData, V
 	catch (const std::bad_alloc& e)
 	{
 		e;  // Supress the warning of C4101
-		vsapi->setError(out, "CubicBezierCurve: failed to allocate memory for lut table");
+		vsapi->setError(out, "CubicBezierCurve: failed to allocate memory for lookup table");
 		vsapi->freeNode(d->node);
 		return;
 	}
@@ -400,8 +450,9 @@ VS_EXTERNAL_API(void) VapourSynthPluginInit(VSConfigPlugin configFunc, VSRegiste
 		"x1:int:opt;"
 		"y1:int:opt;"
 		"x2:int:opt;"
-		"y2:int:opt;",
-		cubicBezierCurveCreate, 0, plugin);
+		"y2:int:opt;"
+		"planes:int[]:opt;",
+		cubicBezierCurveCreate, nullptr, plugin);
 
 	registerFunc(
 		"Quadratic",
@@ -411,6 +462,7 @@ VS_EXTERNAL_API(void) VapourSynthPluginInit(VSConfigPlugin configFunc, VSRegiste
 		"begin:int:opt;"
 		"end:int:opt;"
 		"x1:int:opt;"
-		"y1:int:opt;",
-		quadraticBezierCurveCreate, 0, plugin);
+		"y1:int:opt;"
+		"planes:int[]:opt;",
+		quadraticBezierCurveCreate, nullptr, plugin);
 }

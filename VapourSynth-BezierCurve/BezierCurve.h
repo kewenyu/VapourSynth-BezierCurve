@@ -12,6 +12,8 @@ typedef struct {
 	int begin, end, x1, y1;
 	int range;
 	double accur;
+	bool process[3];
+
 	int* lutTable;
 } quadraticBezierCurveData;
 
@@ -23,6 +25,8 @@ typedef struct {
 	int begin, end, x1, x2, y1, y2;
 	int range;
 	double accur;
+	bool process[3];
+
 	int* lutTable;
 } cubicBezierCurveData;
 
