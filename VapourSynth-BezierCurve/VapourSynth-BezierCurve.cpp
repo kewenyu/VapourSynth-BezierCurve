@@ -169,7 +169,7 @@ void VS_CC quadraticBezierCurveCreate(const VSMap* in, VSMap* out, void* userDat
 	try
 	{
 		if (!isConstantFormat(d->vi) || d->vi->format->sampleType != stInteger ||
-			(d->vi->format->bitsPerSample != 8 && d->vi->format->bitsPerSample != 16))
+			d->vi->format->bitsPerSample < 8 || d->vi->format->bitsPerSample > 16)
 		{
 			throw std::string("only constant format of 8bit or 16bit integer input is supported");
 		}
@@ -352,7 +352,7 @@ void VS_CC cubicBezierCurveCreate(const VSMap* in, VSMap* out, void* userData, V
 	try
 	{
 		if (!isConstantFormat(d->vi) || d->vi->format->sampleType != stInteger ||
-			(d->vi->format->bitsPerSample != 8 && d->vi->format->bitsPerSample != 16))
+			d->vi->format->bitsPerSample < 8 || d->vi->format->bitsPerSample > 16)
 		{
 			throw std::string("only constant format of 8bit or 16bit integer input is supported");
 		}
